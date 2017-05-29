@@ -32,6 +32,3 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
-
-# Twitter API Keys
-/Assets/Scripts/Twitter/APIKeys.cs

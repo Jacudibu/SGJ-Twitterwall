@@ -44,17 +44,17 @@ public class TweetCanvas : MonoBehaviour
         TwitterAPI.instance.SearchTwitter(hashtag, resultType, SearchTweetsResultsCallBack);
     }
 
-    private void SearchTweetsResultsCallBack(List<TweetSearchTwitterData> tweetList)
+    private void SearchTweetsResultsCallBack(List<Tweet> tweetList)
     {
         Debug.Log("Tweet Update\n====================================================");
-        foreach (TweetSearchTwitterData twitterData in tweetList)
+        foreach (Tweet twitterData in tweetList)
         {
             Debug.Log("Tweet: " + twitterData.ToString());
             SpawnTweet(twitterData);
         }
     }
 
-    private void SpawnTweet(TweetSearchTwitterData data)
+    private void SpawnTweet(Tweet data)
     {
         TweetDisplay tweet = Instantiate(textTweetPrefab).GetComponent<TweetDisplay>();
         tweet.Initialize(data);

@@ -14,11 +14,11 @@ public class TweetDisplay : MonoBehaviour
     [SerializeField] private Text handle;
     [SerializeField] private Text content;
 
-    public void Initialize(TweetSearchTwitterData data)
+    public void Initialize(Tweet data)
     {
         StartCoroutine(Coroutine_LoadUserPicture(data.profileImageUrl));
         handle.text = "@" + data.screenName;
-        content.text = data.tweetText;
+        content.text = data.text;
     }
 
     private void LoadAdditionalImagesFromTweetContent(string text)

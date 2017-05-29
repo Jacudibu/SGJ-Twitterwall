@@ -7,8 +7,6 @@ using System.Text;
 using System.Globalization;
 using System.Collections;
 
-using MiniJSON;
-
 // Inspired by https://bitbucket.org/yaustar/twitter-search-with-unity
 
 public class TwitterAPI : MonoBehaviour {
@@ -36,22 +34,16 @@ public class TwitterAPI : MonoBehaviour {
 		}
 	}
 
-	public void SearchTwitter(string keywords, string resultType, Action<List<TweetSearchTwitterData> > callback) 
+	public void SearchTwitter(string keywords, string resultType, Action<List<Tweet> > callback) 
 	{	
 		PrepareOAuthData();
 		StartCoroutine(SearchTwitter_Coroutine(keywords, resultType, callback));
 	}
-
-	public void FindTrendsByLocationTwitter(string location, Action<List<TrendByLocationTwitterData> > callback) 
-	{		
-		PrepareOAuthData();
-		StartCoroutine(FindTrendsByLocation_Coroutine(location, callback));
-	}
 	
-	private IEnumerator SearchTwitter_Coroutine(string keywords, string resultType, Action<List<TweetSearchTwitterData> > callback) 
+	private IEnumerator SearchTwitter_Coroutine(string keywords, string resultType, Action<List<Tweet> > callback) 
 	{
-		// Fix up hashes to be webfriendly
-		keywords = Uri.EscapeDataString(keywords);
+        // Fix up hashes to be webfriendly
+        keywords = Uri.EscapeDataString(keywords);
 
 		string twitterUrl = "https://api.twitter.com/1.1/search/tweets.json";
 		
@@ -69,68 +61,55 @@ public class TwitterAPI : MonoBehaviour {
 	}
 
 	// Use of MINI JSON http://forum.unity3d.com/threads/35484-MiniJSON-script-for-parsing-JSON-data
-	private List<TweetSearchTwitterData> ParseResultsFromSearchTwitter(string jsonResults)
+	private List<Tweet> ParseResultsFromSearchTwitter(string jsonResults)
     {
 		Debug.Log(jsonResults);
 		
-		List<TweetSearchTwitterData> twitterDataList = new List<TweetSearchTwitterData>();
-		object jsonObject = Json.Deserialize(jsonResults);
-		IDictionary search = (IDictionary) jsonObject;
-		IList tweets = (IList) search["statuses"];
+		JSONObject json = new JSONObject(jsonResults);
 
-        Debug.LogWarning(jsonResults);
-		foreach (IDictionary tweet in tweets)
+        if (json.type == JSONObject.Type.OBJECT)
         {
-			IDictionary userInfo = tweet["user"] as IDictionary;			
-			
-			TweetSearchTwitterData twitterData = new TweetSearchTwitterData();			
-			twitterData.tweetText = tweet["text"].ToString();
-			twitterData.screenName = userInfo["screen_name"].ToString();
-			twitterData.retweetCount = (long) tweet["retweet_count"];
-			twitterData.profileImageUrl = userInfo["profile_image_url"].ToString();
-			
-			twitterDataList.Add(twitterData);
-		} 
-		
-		return twitterDataList;
-	}
+            for (int i = 0; i < json.list.Count; i++)
+            {
+                if (json.keys[i].Equals("statuses"))
+                {
+                    return ParseJsonStatuses(json.list[i]);
+                }
+            }
+        }
+        else
+        {
+            Debug.LogError("Received wrong json format!" + json.Print());
+        }
 
-	private IEnumerator FindTrendsByLocation_Coroutine(string location, Action<List<TrendByLocationTwitterData> > callback)
-	{
-		location = Uri.EscapeDataString(location);
-		string twitterUrl = "https://api.twitter.com/1.1/trends/place.json";
-		SortedDictionary<string, string> twitterParamsDictionary = new SortedDictionary<string, string>
-		{
-			{"id", location}
-		};
+        //      Debug.LogWarning(jsonResults);
+        //foreach (IDictionary tweet in tweets)
+        //      {
+        //	IDictionary userInfo = tweet["user"] as IDictionary;			
 
-		WWW query = CreateTwitterAPIQuery(twitterUrl, twitterParamsDictionary);
-		yield return query;
-		
-		callback(ParseResultsFromFindTrendsByLocationTwitter(query.text));
-	}
+        //	TweetSearchTwitterData twitterData = new TweetSearchTwitterData();			
+        //	twitterData.tweetText = tweet["text"].ToString();
+        //	twitterData.screenName = userInfo["screen_name"].ToString();
+        //	twitterData.retweetCount = (long) tweet["retweet_count"];
+        //	twitterData.profileImageUrl = userInfo["profile_image_url"].ToString();
 
-	private List<TrendByLocationTwitterData> ParseResultsFromFindTrendsByLocationTwitter(string jsonResults)
+        //	twitterDataList.Add(twitterData);
+        //} 
+
+        return null;
+    }
+
+    private List<Tweet> ParseJsonStatuses(JSONObject statuses)
     {
-		Debug.Log(jsonResults);
-		
-		List<TrendByLocationTwitterData> twitterDataList = new List<TrendByLocationTwitterData>();
-		object jsonObject = Json.Deserialize(jsonResults);
-		IList jsonList = jsonObject as IList;
-		IDictionary search = jsonList[0] as IDictionary;
-		IList trends = (IList) search["trends"];
-		foreach (IDictionary trend in trends)
+        List<Tweet> tweets = new List<Tweet>();
+
+        for (int i = 0; i < statuses.list.Count; i++)
         {
-			TrendByLocationTwitterData twitterData = new TrendByLocationTwitterData();			
-			twitterData.name = trend["name"].ToString();
-			twitterData.query = trend["query"].ToString();
-			twitterData.url = trend["url"].ToString();
-			
-			twitterDataList.Add(twitterData);
-		} 
-		
-		return twitterDataList;
-	}
+            tweets.Add(new Tweet(statuses.list[i]));
+        }
+
+        return tweets;
+    }
 
 	private WWW CreateTwitterAPIQuery(string twitterUrl, SortedDictionary<string, string> twitterParamsDictionary)
 	{

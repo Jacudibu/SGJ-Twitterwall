@@ -4,10 +4,11 @@ using UnityEngine;
 
 namespace Twitter
 {
+    // Put your Twitter API Keys here!
     public class APIKeys
     {
-        public static string authConsumerKey = "0gcc7aB20ihxhfdAocqrIePpX";
-        public static string authConsumerSecret = "vatHhY1DlO50SwJnRjYbnvivt2uZAuZDqctt6iVecC3UvfvVSv";
+        public static string authConsumerKey = "";
+        public static string authConsumerSecret = "";
         public static string authToken = "";
         public static string authTokenSecret = "";
     }

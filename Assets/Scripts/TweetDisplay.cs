@@ -2,6 +2,8 @@
 using UnityEngine.UI;
 using System.Collections;
 
+using Twitter;
+
 public class TweetDisplay : MonoBehaviour
 {
     public bool ContainsImage

@@ -3,6 +3,8 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
+using Twitter;
+
 public class TweetCanvas : MonoBehaviour
 {
     public string hashtag;

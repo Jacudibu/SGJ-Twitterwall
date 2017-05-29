@@ -6,10 +6,11 @@ namespace Twitter
 {
     public class Tweet
     {
-        public string text = "";
-        public string screenName = "";
-        public string profileImageUrl = "";
-        public long retweetCount = 0;
+        public string text;
+        public User user;
+        public string screenName;
+        public string profileImageUrl;
+        public long retweetCount;
 
         // Creates a tweet from one of the elements of the "statuses"-Array.
         public Tweet(JSONObject json)
@@ -21,7 +22,8 @@ namespace Twitter
                     case "text":
                         text = json.list[i].str;
                         break;
-                    case "":
+                    case "user":
+                        user = JsonUtility.FromJson<User>(json.list[i].ToString());
                         break;
                 }
             }

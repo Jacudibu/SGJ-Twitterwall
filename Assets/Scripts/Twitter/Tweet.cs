@@ -2,6 +2,8 @@ using System.Collections;
 using UnityEngine;
 using System;
 
+using Twitter.Entities;
+
 namespace Twitter
 {
     public class Tweet
@@ -9,6 +11,9 @@ namespace Twitter
         public string text;
         public long retweetCount;
         public User user;
+
+        public Media[] media;
+
 
         // Creates a tweet from one of the elements of the "statuses"-Array.
         public Tweet(JSONObject json)
@@ -22,6 +27,43 @@ namespace Twitter
                         break;
                     case "user":
                         user = JsonUtility.FromJson<User>(json.list[i].ToString());
+                        break;
+                    case "entities":
+                        ParseEntities(json.list[i]);
+                        break;
+                }
+            }
+        }
+
+        public void ParseEntities(JSONObject entities)
+        {
+            for (int i = 0; i < entities.list.Count; i++)
+            {
+                JSONObject obj = entities.list[i];
+
+                switch (entities.keys[i])
+                {
+                    case "media":
+                        media = new Media[obj.list.Count];
+                        for (int current = 0; current < obj.list.Count; current++)
+                        {
+                            media[current] = JsonUtility.FromJson<Media>(obj.list[current].ToString());
+                        }
+                        break;
+
+                    case "urls":
+                        break;
+
+                    case "user_mentions":
+                        break;
+
+                    case "hashtags":
+                        break;
+
+                    case "symbols":
+                        break;
+
+                    case "extended_entities":
                         break;
                 }
             }

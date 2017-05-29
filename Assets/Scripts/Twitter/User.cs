@@ -8,7 +8,7 @@ namespace Twitter
     // Fields share their name within the twitter API so that they can be filled in by Unity's JsonUtility.
     // For more information about each field, have a look at https://dev.twitter.com/overview/api/users
     // Note: Stuff that's already flagged as deprecated in the docs doesn't show up here.
-    public class User
+    public struct User
     {
         //public bool contributors_enabled;
         //public date created_at;

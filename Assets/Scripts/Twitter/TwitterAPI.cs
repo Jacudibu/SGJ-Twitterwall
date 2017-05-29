@@ -12,16 +12,6 @@ namespace Twitter
     // Inspired by https://bitbucket.org/yaustar/twitter-search-with-unity
     public class TwitterAPI : MonoBehaviour
     {
-
-        [SerializeField]
-        private string oauthConsumerKey = "";
-        [SerializeField]
-        private string oauthConsumerSecret = "";
-        [SerializeField]
-        private string oauthToken = "";
-        [SerializeField]
-        private string oauthTokenSecret = "";
-
         private string oauthNonce = "";
         private string oauthTimeStamp = "";
 
@@ -63,11 +53,10 @@ namespace Twitter
             WWW query = CreateTwitterAPIQuery(twitterUrl, twitterParamsDictionary);
             yield return query;
 
-            callback(ParseResultsFromSearchTwitter(query.text));
+            callback(ParseTwitterJson(query.text));
         }
 
-        // Use of MINI JSON http://forum.unity3d.com/threads/35484-MiniJSON-script-for-parsing-JSON-data
-        private List<Tweet> ParseResultsFromSearchTwitter(string jsonResults)
+        private List<Tweet> ParseTwitterJson(string jsonResults)
         {
             Debug.Log(jsonResults);
 
@@ -79,7 +68,7 @@ namespace Twitter
                 {
                     if (json.keys[i].Equals("statuses"))
                     {
-                        return ParseJsonStatuses(json.list[i]);
+                        return ParseStatuses(json.list[i]);
                     }
                 }
             }
@@ -105,7 +94,7 @@ namespace Twitter
             return null;
         }
 
-        private List<Tweet> ParseJsonStatuses(JSONObject statuses)
+        private List<Tweet> ParseStatuses(JSONObject statuses)
         {
             List<Tweet> tweets = new List<Tweet>();
 
@@ -159,11 +148,11 @@ namespace Twitter
             SortedDictionary<string, string> urlParamsDictionary = new SortedDictionary<string, string>
                              {
                                  {"oauth_version", "1.0"},
-                                 {"oauth_consumer_key", this.oauthConsumerKey},
+                                 {"oauth_consumer_key", APIKeys.authConsumerKey},
                                  {"oauth_nonce", this.oauthNonce},
                                  {"oauth_signature_method", "HMAC-SHA1"},
                                  {"oauth_timestamp", this.oauthTimeStamp},
-                                 {"oauth_token", this.oauthToken}
+                                 {"oauth_token", APIKeys.authToken}
                              };
 
             foreach (KeyValuePair<string, string> keyValuePair in searchParamsDictionary)
@@ -178,8 +167,8 @@ namespace Twitter
 
             //generation the signature key the hash will use
             string signatureKey =
-                Uri.EscapeDataString(this.oauthConsumerSecret) + "&" +
-                Uri.EscapeDataString(this.oauthTokenSecret);
+                Uri.EscapeDataString(APIKeys.authConsumerSecret) + "&" +
+                Uri.EscapeDataString(APIKeys.authTokenSecret);
 
             HMACSHA1 hmacsha1 = new HMACSHA1(
                 new ASCIIEncoding().GetBytes(signatureKey));
@@ -198,7 +187,7 @@ namespace Twitter
             authorizationHeaderParams += "OAuth ";
 
             authorizationHeaderParams += "oauth_consumer_key="
-                                         + "\"" + Uri.EscapeDataString(this.oauthConsumerKey) + "\", ";
+                                         + "\"" + Uri.EscapeDataString(APIKeys.authConsumerKey) + "\", ";
 
             authorizationHeaderParams += "oauth_nonce=" + "\"" +
                                          Uri.EscapeDataString(this.oauthNonce) + "\", ";
@@ -214,7 +203,7 @@ namespace Twitter
                                          Uri.EscapeDataString(timeStamp) + "\", ";
 
             authorizationHeaderParams += "oauth_token=" + "\"" +
-                                         Uri.EscapeDataString(this.oauthToken) + "\", ";
+                                         Uri.EscapeDataString(APIKeys.authToken) + "\", ";
 
             authorizationHeaderParams += "oauth_version=" + "\"" +
                                          Uri.EscapeDataString("1.0") + "\"";

@@ -24,6 +24,14 @@ public class TweetCanvas : MonoBehaviour
         StartCoroutine(Coroutine_UpdateTweets());
     }
 
+    public void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            LoadTweets();
+        }
+    }
+
     private IEnumerator Coroutine_UpdateTweets()
     {   
         while (true)
@@ -51,7 +59,7 @@ public class TweetCanvas : MonoBehaviour
         Debug.Log("Tweet Update\n====================================================");
         foreach (Tweet twitterData in tweetList)
         {
-            Debug.Log("Tweet: " + twitterData.ToString());
+            // Debug.Log("Tweet: " + twitterData.ToString());
             SpawnTweet(twitterData);
         }
     }

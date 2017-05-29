@@ -26,15 +26,15 @@ namespace Twitter
         //public int listed_count;
         //public string location;
         public string name;
-        //public Color profile_background_color;
+        //public string profile_background_color;
         //public string profile_background_image_url_https;
         //public bool profile_background_tile;
         //public string profile_banner_url;
         public string profile_image_url_https;
         //public string profile_link_color;
-        //public Color profile_sidebar_border_color;
-        //public Color profile_sidebar_fill_color;
-        //public Color profile_text_color;
+        //public string profile_sidebar_border_color;
+        //public string profile_sidebar_fill_color;
+        //public string profile_text_color;
         //public bool profile_use_background_image
         //public bool protected;
         public string screen_name;

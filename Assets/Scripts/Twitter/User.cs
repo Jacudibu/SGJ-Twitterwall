@@ -5,7 +5,8 @@ using UnityEngine;
 namespace Twitter
 {
     // Basic Class representing a twitter user. Stuff that's missing is just commented out in its declaration.
-    // Fields share their name within the twitter API. For more information, have a look at https://dev.twitter.com/overview/api/users
+    // Fields share their name within the twitter API so that they can be filled in by Unity's JsonUtility.
+    // For more information about each field, have a look at https://dev.twitter.com/overview/api/users
     // Note: Stuff that's already flagged as deprecated in the docs doesn't show up here.
     public class User
     {
@@ -17,8 +18,8 @@ namespace Twitter
         //public Entity entities
         public int favourites_count;
         //public bool? follow_request_sent;
-        public int followers_count;
-        public int friends_count;
+        //public int followers_count;
+        //public int friends_count;
         //public bool geo_enabled;
         public long id;
         public string id_str;

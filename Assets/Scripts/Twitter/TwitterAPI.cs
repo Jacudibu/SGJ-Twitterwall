@@ -53,11 +53,10 @@ namespace Twitter
             WWW query = CreateTwitterAPIQuery(twitterUrl, twitterParamsDictionary);
             yield return query;
 
-            callback(ParseResultsFromSearchTwitter(query.text));
+            callback(ParseTwitterJson(query.text));
         }
 
-        // Use of MINI JSON http://forum.unity3d.com/threads/35484-MiniJSON-script-for-parsing-JSON-data
-        private List<Tweet> ParseResultsFromSearchTwitter(string jsonResults)
+        private List<Tweet> ParseTwitterJson(string jsonResults)
         {
             Debug.Log(jsonResults);
 
@@ -69,7 +68,7 @@ namespace Twitter
                 {
                     if (json.keys[i].Equals("statuses"))
                     {
-                        return ParseJsonStatuses(json.list[i]);
+                        return ParseStatuses(json.list[i]);
                     }
                 }
             }
@@ -95,7 +94,7 @@ namespace Twitter
             return null;
         }
 
-        private List<Tweet> ParseJsonStatuses(JSONObject statuses)
+        private List<Tweet> ParseStatuses(JSONObject statuses)
         {
             List<Tweet> tweets = new List<Tweet>();
 

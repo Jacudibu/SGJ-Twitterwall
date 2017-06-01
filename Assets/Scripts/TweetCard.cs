@@ -30,6 +30,7 @@ public class TweetCard : MonoBehaviour
 
     private IEnumerator Coroutine_LoadUserPicture(string url)
     {
+        url = url.Replace("_normal", "_bigger");
         WWW www = new WWW(url);
         yield return www;
 

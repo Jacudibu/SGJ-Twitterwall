@@ -13,20 +13,31 @@ public class TweetCanvas : MonoBehaviour
     public float timeBetweenUpdates = 61f;
     private float timeLeftUntilNextUpdate = 0f;
 
+    [Header("UI")]
     [SerializeField] private Text hashtagText;
     [SerializeField] private Text updateCounter;
+    [SerializeField] private Text tweetCounter;
+
+    [Header("Tweet Parents")]
     [SerializeField] private Transform textTweetParent;
     [SerializeField] private Transform mediaTweetParent;
+
+    [Header("Prefabs")]
     [SerializeField] private GameObject textTweetPrefab;
     [SerializeField] private GameObject mediaTweetPrefab;
 
-    private List<Tweet> allTweets;
+    private Queue<Tweet> upcomingTweets = new Queue<Tweet>();
     private List<TweetCard> textTweets = new List<TweetCard>();
     private List<TweetCard> mediaTweets = new List<TweetCard>();
+
+    private int totalTweets;
     
     private void Awake()
     {
+        Application.runInBackground = true;
+
         Clear();
+        StartCoroutine(Coroutine_HandleTweetSpawnQueue());
     }
 
     public void Update()
@@ -50,12 +61,24 @@ public class TweetCanvas : MonoBehaviour
 
     private void SearchTweetsResultsCallBack(List<Tweet> tweetList)
     {
-        allTweets = tweetList;
-
-        Debug.Log("Tweet Update\n====================================================");
-        foreach (Tweet twitterData in tweetList)
+        foreach (Tweet tweet in tweetList)
         {
-            SpawnTweet(twitterData);
+            upcomingTweets.Enqueue(tweet);
+        }
+    }
+
+    private IEnumerator Coroutine_HandleTweetSpawnQueue()
+    {
+        while (true)
+        {
+            while (upcomingTweets.Count == 0)
+            {
+                yield return new WaitForSeconds(2f);
+            }
+
+            SpawnTweet(upcomingTweets.Dequeue());
+
+            yield return new WaitForSeconds(Random.Range(2f, 5f));
         }
     }
 
@@ -77,6 +100,9 @@ public class TweetCanvas : MonoBehaviour
             tweet.transform.SetAsFirstSibling();
             textTweets.Add(tweet);
         }
+
+        totalTweets++;
+        tweetCounter.text = totalTweets + " tweets total!";
     }
 
     public void Clear()
@@ -92,6 +118,8 @@ public class TweetCanvas : MonoBehaviour
         }
 
         textTweets.Clear();
+
+        totalTweets = 0;
     }
 
 }

@@ -94,10 +94,10 @@ namespace Twitter
         private WWW CreateTwitterAPIQuery(string twitterUrl, SortedDictionary<string, string> twitterParamsDictionary)
         {
             string signature = CreateSignature(twitterUrl, twitterParamsDictionary);
-            Debug.Log("OAuth Signature: " + signature);
+            // Debug.Log("OAuth Signature: " + signature);
 
             string authHeaderParam = CreateAuthorizationHeaderParameter(signature, this.oauthTimeStamp);
-            Debug.Log("Auth Header: " + authHeaderParam);
+            // Debug.Log("Auth Header: " + authHeaderParam);
 
             Dictionary<string, string> headers = new Dictionary<string, string>();
             headers["Authorization"] = authHeaderParam;

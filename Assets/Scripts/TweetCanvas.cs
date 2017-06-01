@@ -9,35 +9,37 @@ public class TweetCanvas : MonoBehaviour
 {
     public string hashtag;
     public string resultType = "recent";
-    public float timeBetweenUpdates = 120f;
+    [Range(61, 300)]
+    public float timeBetweenUpdates = 61f;
+    private float timeLeftUntilNextUpdate = 0f;
 
     [SerializeField] private Text hashtagText;
+    [SerializeField] private Text updateCounter;
     [SerializeField] private Transform textTweetParent;
-    [SerializeField] private Transform imageTweetParent;
+    [SerializeField] private Transform mediaTweetParent;
     [SerializeField] private GameObject textTweetPrefab;
-    [SerializeField] private GameObject imageTweetPrefab;
+    [SerializeField] private GameObject mediaTweetPrefab;
 
     private List<Tweet> allTweets;
-    private List<TweetDisplay> tweets = new List<TweetDisplay>();
-
-    public void Start()
-    {
-        LoadTweets(hashtag);
-    }
+    private List<TweetCard> textTweets = new List<TweetCard>();
+    private List<TweetCard> mediaTweets = new List<TweetCard>();
 
     public void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        timeLeftUntilNextUpdate -= Time.deltaTime;
+        if (timeLeftUntilNextUpdate <= 0 || Input.GetKeyDown(KeyCode.Space))
         {
             LoadTweets(hashtag);
+            timeLeftUntilNextUpdate = timeBetweenUpdates;
         }
+
+        updateCounter.text = timeLeftUntilNextUpdate.ToString("0");
     }
 
     private void LoadTweets(string hashtag)
     {
         hashtagText.text = hashtag;
 
-        Clear();
         TwitterAPI.instance.FetchAllTweets(hashtag, resultType, SearchTweetsResultsCallBack);
     }
 
@@ -48,28 +50,42 @@ public class TweetCanvas : MonoBehaviour
         Debug.Log("Tweet Update\n====================================================");
         foreach (Tweet twitterData in tweetList)
         {
-            Debug.Log("Tweet: " + twitterData.ToString());
+            // Debug.Log("Tweet: " + twitterData.ToString());
             SpawnTweet(twitterData);
         }
     }
 
     private void SpawnTweet(Tweet data)
     {
-        TweetDisplay tweet = Instantiate(textTweetPrefab).GetComponent<TweetDisplay>();
-        tweet.Initialize(data);
-        tweet.transform.SetParent(textTweetParent);
-
-        tweets.Add(tweet);
+        if (data.media == null || data.media.Length == 0)
+        {
+            TweetCard tweet = Instantiate(textTweetPrefab).GetComponent<TweetCard>();
+            tweet.Initialize(data);
+            tweet.transform.SetParent(textTweetParent);
+            textTweets.Add(tweet);
+        }
+        else
+        {
+            TweetCard tweet = Instantiate(mediaTweetPrefab).GetComponent<TweetCard>();
+            tweet.Initialize(data);
+            tweet.transform.SetParent(mediaTweetParent);
+            textTweets.Add(tweet);
+        }
     }
 
     public void Clear()
     {
-        foreach (TweetDisplay tweet in tweets)
+        foreach (TweetCard tweet in textTweets)
         {
             Destroy(tweet.gameObject);
         }
 
-        tweets.Clear();
+        foreach (TweetCard tweet in mediaTweets)
+        {
+            Destroy(tweet.gameObject);
+        }
+
+        textTweets.Clear();
     }
 
 }

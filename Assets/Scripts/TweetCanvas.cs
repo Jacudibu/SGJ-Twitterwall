@@ -17,33 +17,20 @@ public class TweetCanvas : MonoBehaviour
     [SerializeField] private GameObject textTweetPrefab;
     [SerializeField] private GameObject imageTweetPrefab;
 
+    private List<Tweet> allTweets;
     private List<TweetDisplay> tweets = new List<TweetDisplay>();
 
     public void Start()
     {
-        StartCoroutine(Coroutine_UpdateTweets());
+        LoadTweets(hashtag);
     }
 
     public void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            LoadTweets();
+            LoadTweets(hashtag);
         }
-    }
-
-    private IEnumerator Coroutine_UpdateTweets()
-    {   
-        while (true)
-        {
-            LoadTweets();
-            yield return new WaitForSecondsRealtime(timeBetweenUpdates);
-        }
-    }
-
-    private void LoadTweets()
-    {
-        LoadTweets(hashtag);
     }
 
     private void LoadTweets(string hashtag)
@@ -51,15 +38,17 @@ public class TweetCanvas : MonoBehaviour
         hashtagText.text = hashtag;
 
         Clear();
-        TwitterAPI.instance.SearchTwitter(hashtag, resultType, SearchTweetsResultsCallBack);
+        TwitterAPI.instance.FetchAllTweets(hashtag, resultType, SearchTweetsResultsCallBack);
     }
 
     private void SearchTweetsResultsCallBack(List<Tweet> tweetList)
     {
+        allTweets = tweetList;
+
         Debug.Log("Tweet Update\n====================================================");
         foreach (Tweet twitterData in tweetList)
         {
-            // Debug.Log("Tweet: " + twitterData.ToString());
+            Debug.Log("Tweet: " + twitterData.ToString());
             SpawnTweet(twitterData);
         }
     }

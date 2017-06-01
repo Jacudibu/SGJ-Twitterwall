@@ -30,25 +30,26 @@ namespace Twitter
             }
         }
 
-        public void SearchTwitter(string keywords, string resultType, Action<List<Tweet>> callback)
+        public void FetchAllTweets(string hashtags, string resultType, Action<List<Tweet>> callback)
         {
             PrepareOAuthData();
-            StartCoroutine(SearchTwitter_Coroutine(keywords, resultType, callback));
+            StartCoroutine(FetchAllTweets_Coroutine(hashtags, resultType, callback));
         }
 
-        private IEnumerator SearchTwitter_Coroutine(string keywords, string resultType, Action<List<Tweet>> callback)
+        private IEnumerator FetchAllTweets_Coroutine(string hashtags, string resultType, Action<List<Tweet>> callback)
         {
             // Fix up hashes to be webfriendly
-            keywords = Uri.EscapeDataString(keywords);
+            hashtags = Uri.EscapeDataString(hashtags);
 
             string twitterUrl = "https://api.twitter.com/1.1/search/tweets.json";
 
             SortedDictionary<string, string> twitterParamsDictionary = new SortedDictionary<string, string>
-        {
-            {"q", keywords},
-            {"count", "100"},
-            {"result_type", resultType},
-        };
+            {
+                {"q", hashtags},
+                {"count", "100"},
+                {"result_type", resultType},
+                {"since_id", Tweet.newestID.ToString()}
+            };
 
             WWW query = CreateTwitterAPIQuery(twitterUrl, twitterParamsDictionary);
             yield return query;
@@ -58,8 +59,6 @@ namespace Twitter
 
         private List<Tweet> ParseTwitterJson(string jsonResults)
         {
-            Debug.Log(jsonResults);
-
             JSONObject json = new JSONObject(jsonResults);
 
             if (json.type == JSONObject.Type.OBJECT)
@@ -76,20 +75,6 @@ namespace Twitter
             {
                 Debug.LogError("Received wrong json format!" + json.Print());
             }
-
-            //      Debug.LogWarning(jsonResults);
-            //foreach (IDictionary tweet in tweets)
-            //      {
-            //	IDictionary userInfo = tweet["user"] as IDictionary;			
-
-            //	TweetSearchTwitterData twitterData = new TweetSearchTwitterData();			
-            //	twitterData.tweetText = tweet["text"].ToString();
-            //	twitterData.screenName = userInfo["screen_name"].ToString();
-            //	twitterData.retweetCount = (long) tweet["retweet_count"];
-            //	twitterData.profileImageUrl = userInfo["profile_image_url"].ToString();
-
-            //	twitterDataList.Add(twitterData);
-            //} 
 
             return null;
         }

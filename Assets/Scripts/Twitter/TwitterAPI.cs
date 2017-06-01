@@ -17,7 +17,6 @@ namespace Twitter
 
         public static TwitterAPI instance = null;
 
-        // Use this for initialization
         void Awake()
         {
             if (instance == null)

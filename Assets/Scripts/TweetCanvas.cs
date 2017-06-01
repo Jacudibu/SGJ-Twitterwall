@@ -23,6 +23,11 @@ public class TweetCanvas : MonoBehaviour
     private List<Tweet> allTweets;
     private List<TweetCard> textTweets = new List<TweetCard>();
     private List<TweetCard> mediaTweets = new List<TweetCard>();
+    
+    private void Awake()
+    {
+        Clear();
+    }
 
     public void Update()
     {

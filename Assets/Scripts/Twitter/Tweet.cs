@@ -21,6 +21,7 @@ namespace Twitter
         // Creates a tweet from one of the elements of the "statuses"-Array.
         public Tweet(JSONObject json)
         {
+            Debug.Log("Tweet: " + json);
             for (int i = 0; i < json.list.Count; i++)
             {
                 switch (json.keys[i])

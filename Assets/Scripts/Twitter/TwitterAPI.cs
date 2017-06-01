@@ -30,25 +30,26 @@ namespace Twitter
             }
         }
 
-        public void SearchTwitter(string keywords, string resultType, Action<List<Tweet>> callback)
+        public void FetchAllTweets(string hashtags, string resultType, Action<List<Tweet>> callback)
         {
             PrepareOAuthData();
-            StartCoroutine(SearchTwitter_Coroutine(keywords, resultType, callback));
+            StartCoroutine(FetchAllTweets_Coroutine(hashtags, resultType, callback));
         }
 
-        private IEnumerator SearchTwitter_Coroutine(string keywords, string resultType, Action<List<Tweet>> callback)
+        private IEnumerator FetchAllTweets_Coroutine(string hashtags, string resultType, Action<List<Tweet>> callback)
         {
             // Fix up hashes to be webfriendly
-            keywords = Uri.EscapeDataString(keywords);
+            hashtags = Uri.EscapeDataString(hashtags);
 
             string twitterUrl = "https://api.twitter.com/1.1/search/tweets.json";
 
             SortedDictionary<string, string> twitterParamsDictionary = new SortedDictionary<string, string>
-        {
-            {"q", keywords},
-            {"count", "100"},
-            {"result_type", resultType},
-        };
+            {
+                {"q", hashtags},
+                {"count", "100"},
+                {"result_type", resultType},
+                {"since_id", Tweet.newestID.ToString()}
+            };
 
             WWW query = CreateTwitterAPIQuery(twitterUrl, twitterParamsDictionary);
             yield return query;
@@ -58,8 +59,6 @@ namespace Twitter
 
         private List<Tweet> ParseTwitterJson(string jsonResults)
         {
-            Debug.Log(jsonResults);
-
             JSONObject json = new JSONObject(jsonResults);
 
             if (json.type == JSONObject.Type.OBJECT)
@@ -77,20 +76,6 @@ namespace Twitter
                 Debug.LogError("Received wrong json format!" + json.Print());
             }
 
-            //      Debug.LogWarning(jsonResults);
-            //foreach (IDictionary tweet in tweets)
-            //      {
-            //	IDictionary userInfo = tweet["user"] as IDictionary;			
-
-            //	TweetSearchTwitterData twitterData = new TweetSearchTwitterData();			
-            //	twitterData.tweetText = tweet["text"].ToString();
-            //	twitterData.screenName = userInfo["screen_name"].ToString();
-            //	twitterData.retweetCount = (long) tweet["retweet_count"];
-            //	twitterData.profileImageUrl = userInfo["profile_image_url"].ToString();
-
-            //	twitterDataList.Add(twitterData);
-            //} 
-
             return null;
         }
 
@@ -100,19 +85,40 @@ namespace Twitter
 
             for (int i = 0; i < statuses.list.Count; i++)
             {
-                tweets.Add(new Tweet(statuses.list[i]));
+                if (!isRetweeted(statuses.list[i]))
+                {
+                    tweets.Add(new Tweet(statuses.list[i]));
+                }
+                
             }
 
             return tweets;
         }
 
+        private bool isRetweeted(JSONObject status)
+        {
+            for (int i = 0; i < status.list.Count; i++)
+            {
+                if (status.keys[i].Equals("text"))
+                {
+                    return status.list[i].str.StartsWith("RT ");
+                }
+
+                //if (status.keys[i].Equals("retweeted"))
+                //{
+                //    return status.list[i].b;
+                //}
+            }
+            return false;
+        }
+
         private WWW CreateTwitterAPIQuery(string twitterUrl, SortedDictionary<string, string> twitterParamsDictionary)
         {
             string signature = CreateSignature(twitterUrl, twitterParamsDictionary);
-            Debug.Log("OAuth Signature: " + signature);
+            // Debug.Log("OAuth Signature: " + signature);
 
             string authHeaderParam = CreateAuthorizationHeaderParameter(signature, this.oauthTimeStamp);
-            Debug.Log("Auth Header: " + authHeaderParam);
+            // Debug.Log("Auth Header: " + authHeaderParam);
 
             Dictionary<string, string> headers = new Dictionary<string, string>();
             headers["Authorization"] = authHeaderParam;
@@ -129,10 +135,6 @@ namespace Twitter
             oauthNonce = Convert.ToBase64String(new ASCIIEncoding().GetBytes(DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture)));
             TimeSpan _timeSpan = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0);
             oauthTimeStamp = Convert.ToInt64(_timeSpan.TotalSeconds).ToString(CultureInfo.InvariantCulture);
-
-            // Override the nounce and timestamp here if troubleshooting with Twitter's OAuth Tool
-            //oauthNonce = "69db07d069ac50cd673f52ee08678596";
-            //oauthTimeStamp = "1442419142";
         }
 
         // Taken from http://www.i-avington.com/Posts/Post/making-a-twitter-oauth-api-call-using-c

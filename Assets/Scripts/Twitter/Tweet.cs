@@ -8,7 +8,10 @@ namespace Twitter
 {
     public class Tweet
     {
+        public static long newestID = 0;
+
         public string text;
+        public long id;
         public long retweetCount;
         public User user;
 
@@ -24,6 +27,12 @@ namespace Twitter
                 {
                     case "text":
                         text = json.list[i].str;
+                        break;
+                    case "id":
+                        id = json.list[i].i;
+                        if (id > newestID)
+                            newestID = id;
+
                         break;
                     case "user":
                         user = JsonUtility.FromJson<User>(json.list[i].ToString());

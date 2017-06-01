@@ -4,7 +4,7 @@ using System.Collections;
 
 using Twitter;
 
-public class TweetDisplay : MonoBehaviour
+public class TweetCard : MonoBehaviour
 {
     public bool ContainsImage
     {
@@ -21,20 +21,10 @@ public class TweetDisplay : MonoBehaviour
         StartCoroutine(Coroutine_LoadUserPicture(tweet.user.profile_image_url_https));
         handle.text = "@" + tweet.user.screen_name;
         content.text = tweet.text;
-    }
 
-    private void LoadAdditionalImagesFromTweetContent(string text)
-    {
-        int index = text.IndexOf("https://t.co/");
-        if (index < 0)
+        if (tweet.media != null && tweet.media.Length > 0)
         {
-            string path = "";
-
-            while (text[index] != ' ' && index + 1 < text.Length)
-            {
-                path += text[index];
-                index++;
-            }
+            StartCoroutine(Coroutine_LoadImage(tweet.media[0].media_url));
         }
     }
 
@@ -59,9 +49,6 @@ public class TweetDisplay : MonoBehaviour
             Rect rect = new Rect(0, 0, www.texture.width, www.texture.height);
             Vector2 pivot = new Vector2(0.5f, 0.5f);
             attachedImage.sprite = Sprite.Create(www.texture, rect, pivot);
-            Debug.Log("Image found!");
         }
-        else
-            Debug.Log("NO Image found!");
     }
 }

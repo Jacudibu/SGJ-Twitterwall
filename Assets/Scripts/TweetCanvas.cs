@@ -3,74 +3,123 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
+using Twitter;
+
 public class TweetCanvas : MonoBehaviour
 {
     public string hashtag;
     public string resultType = "recent";
-    public float timeBetweenUpdates = 120f;
+    [Range(61, 300)]
+    public float timeBetweenUpdates = 61f;
+    private float timeLeftUntilNextUpdate = 0f;
 
+    [Header("UI")]
     [SerializeField] private Text hashtagText;
+    [SerializeField] private Text updateCounter;
+    [SerializeField] private Text tweetCounter;
+
+    [Header("Tweet Parents")]
     [SerializeField] private Transform textTweetParent;
-    [SerializeField] private Transform imageTweetParent;
+    [SerializeField] private Transform mediaTweetParent;
+
+    [Header("Prefabs")]
     [SerializeField] private GameObject textTweetPrefab;
-    [SerializeField] private GameObject imageTweetPrefab;
+    [SerializeField] private GameObject mediaTweetPrefab;
 
-    private List<TweetDisplay> tweets = new List<TweetDisplay>();
+    private Queue<Tweet> upcomingTweets = new Queue<Tweet>();
+    private List<TweetCard> textTweets = new List<TweetCard>();
+    private List<TweetCard> mediaTweets = new List<TweetCard>();
 
-    public void Start()
+    private int totalTweets;
+    
+    private void Awake()
     {
-        StartCoroutine(Coroutine_UpdateTweets());
+        Application.runInBackground = true;
+
+        Clear();
+        StartCoroutine(Coroutine_HandleTweetSpawnQueue());
     }
 
-    private IEnumerator Coroutine_UpdateTweets()
-    {   
-        while (true)
+    public void Update()
+    {
+        timeLeftUntilNextUpdate -= Time.deltaTime;
+        if (timeLeftUntilNextUpdate <= 0 || Input.GetKeyDown(KeyCode.Space))
         {
-            LoadTweets();
-            yield return new WaitForSecondsRealtime(timeBetweenUpdates);
+            LoadTweets(hashtag);
+            timeLeftUntilNextUpdate = timeBetweenUpdates;
         }
-    }
 
-    private void LoadTweets()
-    {
-        LoadTweets(hashtag);
+        updateCounter.text = timeLeftUntilNextUpdate.ToString("0");
     }
 
     private void LoadTweets(string hashtag)
     {
         hashtagText.text = hashtag;
 
-        Clear();
-        TwitterAPI.instance.SearchTwitter(hashtag, resultType, SearchTweetsResultsCallBack);
+        TwitterAPI.instance.FetchAllTweets(hashtag, resultType, SearchTweetsResultsCallBack);
     }
 
-    private void SearchTweetsResultsCallBack(List<TweetSearchTwitterData> tweetList)
+    private void SearchTweetsResultsCallBack(List<Tweet> tweetList)
     {
-        Debug.Log("Tweet Update\n====================================================");
-        foreach (TweetSearchTwitterData twitterData in tweetList)
+        foreach (Tweet tweet in tweetList)
         {
-            Debug.Log("Tweet: " + twitterData.ToString());
-            SpawnTweet(twitterData);
+            upcomingTweets.Enqueue(tweet);
         }
     }
 
-    private void SpawnTweet(TweetSearchTwitterData data)
+    private IEnumerator Coroutine_HandleTweetSpawnQueue()
     {
-        TweetDisplay tweet = Instantiate(textTweetPrefab).GetComponent<TweetDisplay>();
-        tweet.Initialize(data);
-        tweet.transform.SetParent(textTweetParent);
+        while (true)
+        {
+            while (upcomingTweets.Count == 0)
+            {
+                yield return new WaitForSeconds(2f);
+            }
 
-        tweets.Add(tweet);
+            SpawnTweet(upcomingTweets.Dequeue());
+
+            yield return new WaitForSeconds(Random.Range(2f, 5f));
+        }
+    }
+
+    private void SpawnTweet(Tweet data)
+    {
+        if (data.media == null || data.media.Length == 0)
+        {
+            TweetCard tweet = Instantiate(textTweetPrefab).GetComponent<TweetCard>();
+            tweet.Initialize(data);
+            tweet.transform.SetParent(textTweetParent);
+            tweet.transform.SetAsFirstSibling();
+            textTweets.Add(tweet);
+        }
+        else
+        {
+            TweetCard tweet = Instantiate(mediaTweetPrefab).GetComponent<TweetCard>();
+            tweet.Initialize(data);
+            tweet.transform.SetParent(mediaTweetParent);
+            tweet.transform.SetAsFirstSibling();
+            textTweets.Add(tweet);
+        }
+
+        totalTweets++;
+        tweetCounter.text = totalTweets + " tweets total!";
     }
 
     public void Clear()
     {
-        foreach (TweetDisplay tweet in tweets)
+        foreach (TweetCard tweet in textTweets)
         {
             Destroy(tweet.gameObject);
         }
 
-        tweets.Clear();
+        foreach (TweetCard tweet in mediaTweets)
+        {
+            Destroy(tweet.gameObject);
+        }
+
+        textTweets.Clear();
+
+        totalTweets = 0;
     }
 
 }

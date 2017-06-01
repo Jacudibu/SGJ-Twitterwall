@@ -50,7 +50,6 @@ public class TweetCanvas : MonoBehaviour
         Debug.Log("Tweet Update\n====================================================");
         foreach (Tweet twitterData in tweetList)
         {
-            // Debug.Log("Tweet: " + twitterData.ToString());
             SpawnTweet(twitterData);
         }
     }
@@ -62,6 +61,7 @@ public class TweetCanvas : MonoBehaviour
             TweetCard tweet = Instantiate(textTweetPrefab).GetComponent<TweetCard>();
             tweet.Initialize(data);
             tweet.transform.SetParent(textTweetParent);
+            tweet.transform.SetAsFirstSibling();
             textTweets.Add(tweet);
         }
         else
@@ -69,6 +69,7 @@ public class TweetCanvas : MonoBehaviour
             TweetCard tweet = Instantiate(mediaTweetPrefab).GetComponent<TweetCard>();
             tweet.Initialize(data);
             tweet.transform.SetParent(mediaTweetParent);
+            tweet.transform.SetAsFirstSibling();
             textTweets.Add(tweet);
         }
     }

@@ -85,10 +85,31 @@ namespace Twitter
 
             for (int i = 0; i < statuses.list.Count; i++)
             {
-                tweets.Add(new Tweet(statuses.list[i]));
+                if (!isRetweeted(statuses.list[i]))
+                {
+                    tweets.Add(new Tweet(statuses.list[i]));
+                }
+                
             }
 
             return tweets;
+        }
+
+        private bool isRetweeted(JSONObject status)
+        {
+            for (int i = 0; i < status.list.Count; i++)
+            {
+                if (status.keys[i].Equals("text"))
+                {
+                    return status.list[i].str.StartsWith("RT ");
+                }
+
+                //if (status.keys[i].Equals("retweeted"))
+                //{
+                //    return status.list[i].b;
+                //}
+            }
+            return false;
         }
 
         private WWW CreateTwitterAPIQuery(string twitterUrl, SortedDictionary<string, string> twitterParamsDictionary)
@@ -114,10 +135,6 @@ namespace Twitter
             oauthNonce = Convert.ToBase64String(new ASCIIEncoding().GetBytes(DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture)));
             TimeSpan _timeSpan = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0);
             oauthTimeStamp = Convert.ToInt64(_timeSpan.TotalSeconds).ToString(CultureInfo.InvariantCulture);
-
-            // Override the nounce and timestamp here if troubleshooting with Twitter's OAuth Tool
-            //oauthNonce = "69db07d069ac50cd673f52ee08678596";
-            //oauthTimeStamp = "1442419142";
         }
 
         // Taken from http://www.i-avington.com/Posts/Post/making-a-twitter-oauth-api-call-using-c

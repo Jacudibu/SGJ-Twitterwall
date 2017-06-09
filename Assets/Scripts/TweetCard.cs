@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using TMPro;
 
 using Twitter;
 
@@ -13,8 +14,8 @@ public class TweetCard : MonoBehaviour
 
     [SerializeField] private Image userPic;
     [SerializeField] private Image attachedImage;
-    [SerializeField] private Text handle;
-    [SerializeField] private Text content;
+    [SerializeField] private TextMeshProUGUI handle;
+    [SerializeField] private TextMeshProUGUI content;
 
     public void Initialize(Tweet tweet)
     {

@@ -83,5 +83,31 @@ namespace Twitter
         {
             return user.screen_name + " posted: \"" + text + "\" and retweeted " + retweetCount.ToString() + " times. Profile image URL: " + user.profile_image_url_https;
         }
+
+        public static int Compare(Tweet x, Tweet y)
+        {
+            if (x == null)
+            {
+                if (y == null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return -1;
+                }
+            }
+            else
+            {
+                if (y == null)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return x.id.CompareTo(y.id);
+                }
+            }
+        }
     }
 }

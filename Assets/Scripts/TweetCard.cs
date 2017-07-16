@@ -20,7 +20,13 @@ public class TweetCard : MonoBehaviour
     {
         StartCoroutine(Coroutine_LoadUserPicture(tweet.user.profile_image_url_https));
         handle.text = "@" + tweet.user.screen_name;
-        content.text = tweet.text;
+        content.text = tweet.text.Replace("\\/", "/").Replace("\\n", " ");
+        content.text = content.text.Replace("\\u00e4", "ä").Replace("\\u00c4", "Ä");
+        content.text = content.text.Replace("\\u00f6", "ö").Replace("\\u00d6", "Ö");
+        content.text = content.text.Replace("\\u00fc", "ü").Replace("\\u00dc", "Ü");
+        content.text = content.text.Replace("\\u00df", "ß");
+        content.text = content.text.Replace("&lt;", "<").Replace("&gt;", ">");
+        
 
         if (tweet.media != null && tweet.media.Length > 0)
         {

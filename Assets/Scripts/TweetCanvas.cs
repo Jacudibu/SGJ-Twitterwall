@@ -61,6 +61,8 @@ public class TweetCanvas : MonoBehaviour
 
     private void SearchTweetsResultsCallBack(List<Tweet> tweetList)
     {
+        tweetList.Sort(Tweet.Compare);
+
         foreach (Tweet tweet in tweetList)
         {
             upcomingTweets.Enqueue(tweet);
@@ -69,16 +71,41 @@ public class TweetCanvas : MonoBehaviour
 
     private IEnumerator Coroutine_HandleTweetSpawnQueue()
     {
+        int emptyQueueTimer = 0;
         while (true)
         {
             while (upcomingTweets.Count == 0)
             {
                 yield return new WaitForSeconds(2f);
+                emptyQueueTimer += 2;
+                if (emptyQueueTimer > 300)
+                {
+                    yield return DisplayOldTweets();
+                }
             }
 
+            emptyQueueTimer = 0;
             SpawnTweet(upcomingTweets.Dequeue());
 
             yield return new WaitForSeconds(Random.Range(2f, 5f));
+        }
+    }
+
+    private IEnumerator DisplayOldTweets()
+    {
+        for (int i = 0; i < textTweets.Count || i < mediaTweets.Count; i++)
+        {
+            if (i < textTweets.Count)
+            {
+                textTweets[i].transform.SetAsFirstSibling();
+                yield return new WaitForSeconds(5f);
+            }
+
+            if (i < mediaTweets.Count)
+            {
+                mediaTweets[i].transform.SetAsFirstSibling();
+                yield return new WaitForSeconds(5f);
+            }
         }
     }
 
